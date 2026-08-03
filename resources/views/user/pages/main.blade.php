@@ -7,11 +7,11 @@
 @section('bodyClass', 'shark-site shark-home-page')
 
 @push('styles')
-    @vite('resources/css/user/pages/main.css')
+    @vite('resources/css/user/main.css')
 @endpush
 
 @push('scripts')
-    @vite('resources/js/user/pages/main.js')
+    @vite('resources/js/user/main.js')
 @endpush
 
 @section('content')
@@ -30,7 +30,7 @@
             preload="auto"
             aria-hidden="true"
         >
-            <source src="{{ asset('landing.mov') }}" type="video/quicktime">
+            <source src="{{ asset('landing.mp4') }}" type="video/mp4">
 
             თქვენი ბრაუზერი ვიდეოს ვერ ხსნის.
         </video>

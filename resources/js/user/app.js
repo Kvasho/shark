@@ -120,3 +120,96 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const loader = document.getElementById('sharkPageLoader');
+
+    if (!loader) {
+        return;
+    }
+
+    let pageIsChanging = false;
+
+    function hideLoader() {
+        document.body.classList.remove('shark-page-loading');
+
+        loader.classList.add('is-leaving');
+        loader.classList.remove('is-visible');
+
+        setTimeout(function () {
+            loader.classList.remove('is-leaving');
+        }, 950);
+    }
+
+    function showLoader(url) {
+        if (pageIsChanging) {
+            return;
+        }
+
+        pageIsChanging = true;
+
+        document.body.classList.add('shark-page-loading');
+
+        loader.classList.remove('is-leaving');
+
+        window.requestAnimationFrame(function () {
+            loader.classList.add('is-visible');
+        });
+
+        setTimeout(function () {
+            window.location.href = url;
+        }, 850);
+    }
+
+    document.body.classList.add('shark-page-loading');
+
+    window.addEventListener('load', function () {
+        setTimeout(hideLoader, 550);
+    });
+
+    document.addEventListener('click', function (event) {
+        const link = event.target.closest('a');
+
+        if (!link) {
+            return;
+        }
+
+        const href = link.getAttribute('href');
+
+        if (
+            !href ||
+            href.startsWith('#') ||
+            href.startsWith('mailto:') ||
+            href.startsWith('tel:') ||
+            link.hasAttribute('download') ||
+            link.target === '_blank' ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+
+        const destination = new URL(link.href, window.location.href);
+
+        if (destination.origin !== window.location.origin) {
+            return;
+        }
+
+        if (destination.href === window.location.href) {
+            return;
+        }
+
+        event.preventDefault();
+
+        showLoader(destination.href);
+    });
+
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            pageIsChanging = false;
+            hideLoader();
+        }
+    });
+});

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
 
@@ -17,7 +17,16 @@
 
     <meta
         name="description"
-        content="@yield('description', 'SHARK — კომპანიის ოფიციალური ვებგვერდი')"
+        content="@yield(
+            'description',
+            'SHARK — კომპანიის ოფიციალური ვებგვერდი'
+        )"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ asset('favicon.png') }}"
     >
 
     @vite([
@@ -30,15 +39,42 @@
     @stack('styles')
 </head>
 
-<body class="@yield('bodyClass', 'shark-site')">
+<body class="@yield('bodyClass', 'shark-site') shark-page-loading">
 
-    @include('user.components.header')
+    <div
+        id="sharkPageLoader"
+        class="shark-page-loader is-visible"
+        role="status"
+        aria-label="გვერდი იტვირთება"
+    >
+        <div class="shark-page-loader__content">
 
-    <main class="shark-main">
-        @yield('content')
-    </main>
+            <div
+                class="shark-page-loader__logo"
+                aria-label="SHARK"
+            >
+                SHARK
+            </div>
 
-    @include('user.components.footer')
+            <div
+                class="shark-page-loader__line"
+                aria-hidden="true"
+            ></div>
+
+        </div>
+    </div>
+
+    <div class="shark-site-wrapper">
+
+        @include('user.components.header')
+
+        <main class="shark-main">
+            @yield('content')
+        </main>
+
+        @include('user.components.footer')
+
+    </div>
 
     @stack('scripts')
 </body>

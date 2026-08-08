@@ -39,7 +39,7 @@
 
                 <a
                     href="{{ route('projects') }}"
-                    class="shark-navigation__link {{ request()->routeIs('projects') ? 'is-active' : '' }}"
+                    class="shark-navigation__link {{ request()->routeIs('projects*') ? 'is-active' : '' }}"
                 >
                     პროექტები
                 </a>
@@ -58,6 +58,17 @@
                     კონტაქტი
                 </a>
             </nav>
+
+            <button
+                type="button"
+                id="sharkThemeButton"
+                class="shark-theme-button"
+                aria-label="ღამის რეჟიმის ჩართვა"
+                aria-pressed="false"
+                title="თემის შეცვლა"
+            >
+                <i class="fa-solid fa-moon" aria-hidden="true"></i>
+            </button>
 
             <div class="shark-language">
                 <button

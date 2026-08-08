@@ -13,6 +13,18 @@
         content="{{ csrf_token() }}"
     >
 
+    <script>
+        (function () {
+            document.documentElement.classList.add('shark-page-loading');
+            if (sessionStorage.getItem('sharkPageTransitionPending') === 'true') {
+                document.documentElement.classList.add('shark-transition-arrival');
+            }
+            const savedTheme = localStorage.getItem('sharkTheme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        })();
+    </script>
+
     <title>@yield('title', 'SHARK')</title>
 
     <meta
@@ -31,6 +43,17 @@
 </head>
 
 <body class="@yield('bodyClass', 'shark-site')">
+
+    <div id="sharkPageTransition" class="shark-page-transition" aria-hidden="true">
+        <div class="shark-page-transition__inner">
+            <div class="shark-page-transition__logo" aria-label="SHARK">
+                <span>SHARK</span>
+                <span class="shark-page-transition__logo-fill">SHARK</span>
+            </div>
+            <div class="shark-page-transition__track"><span></span></div>
+            <small class="shark-page-transition__value">0%</small>
+        </div>
+    </div>
 
     @include('user.components.header')
 

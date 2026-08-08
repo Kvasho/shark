@@ -1,3 +1,15 @@
+FROM node:22-bookworm-slim AS frontend
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY vite.config.js ./
+COPY resources ./resources
+
+RUN npm run build
+
 FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
@@ -9,8 +21,6 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
-    nodejs \
-    npm \
     && docker-php-ext-install pdo_mysql mbstring bcmath gd zip
 
 RUN a2enmod rewrite
@@ -23,8 +33,7 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN npm install
-RUN npm run build
+COPY --from=frontend /app/public/build ./public/build
 
 RUN mkdir -p \
     storage/framework/cache \

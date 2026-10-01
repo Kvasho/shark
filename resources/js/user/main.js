@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const hero = document.getElementById('sharkHero');
     const heroVideo = document.getElementById('sharkHeroVideo');
+    const soundButton = document.getElementById('sharkSoundButton');
     const scrollIndicator = document.querySelector(
         '.shark-scroll-indicator'
     );
@@ -43,6 +44,47 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function updateSoundButton() {
+        if (!heroVideo || !soundButton) {
+            return;
+        }
+
+        const soundIsOn = !heroVideo.muted;
+        const icon = soundButton.querySelector('i');
+        const label = soundButton.querySelector('span');
+
+        soundButton.setAttribute('aria-pressed', String(soundIsOn));
+        soundButton.setAttribute(
+            'aria-label',
+            window.SharkI18n.translate(
+                soundIsOn ? 'ხმის გამორთვა' : 'ხმის ჩართვა'
+            )
+        );
+
+        if (icon) {
+            icon.className = soundIsOn
+                ? 'fa-solid fa-volume-high'
+                : 'fa-solid fa-volume-xmark';
+        }
+
+        if (label) {
+            label.textContent = window.SharkI18n.translate(
+                soundIsOn ? 'ხმის გამორთვა' : 'ხმის ჩართვა'
+            );
+        }
+    }
+
+    function enableVideoSound() {
+        if (!heroVideo) {
+            return;
+        }
+
+        heroVideo.muted = false;
+        heroVideo.volume = 1;
+        heroVideo.play().catch(function () {});
+        updateSoundButton();
+    }
+
     if (heroVideo) {
         if (heroVideo.readyState >= 3) {
             playHeroVideo();
@@ -60,8 +102,23 @@ document.addEventListener('DOMContentLoaded', function () {
             heroVideo.currentTime = 0;
             heroVideo.play().catch(function () {});
         });
+
+        updateSoundButton();
     } else {
         startHeroAnimation();
+    }
+
+    if (soundButton && heroVideo) {
+        soundButton.addEventListener('click', function () {
+            heroVideo.muted = !heroVideo.muted;
+            heroVideo.volume = 1;
+            heroVideo.play().catch(function () {});
+            updateSoundButton();
+        });
+
+        document.addEventListener('pointerdown', enableVideoSound, {
+            once: true
+        });
     }
 
     if (scrollIndicator) {
@@ -103,15 +160,72 @@ document.addEventListener('DOMContentLoaded', function () {
                 scrollIndicator.classList.remove('is-hidden');
             }
 
-            if (heroVideo && scrollPosition < heroHeight) {
-                const movement = Math.min(scrollPosition * 0.12, 60);
-
-                heroVideo.style.transform =
-                    `translate(-50%, calc(-50% + ${movement}px)) scale(1.08)`;
-            }
         },
         { passive: true }
     );
+
+    const revealElements = document.querySelectorAll('.reveal');
+    const reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    if ('IntersectionObserver' in window && !reduceMotion) {
+        const revealObserver = new IntersectionObserver(
+            function (entries, observer) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) {
+                        return;
+                    }
+
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                });
+            },
+            { threshold: 0.14, rootMargin: '0px 0px -45px' }
+        );
+
+        revealElements.forEach(function (element) {
+            revealObserver.observe(element);
+        });
+    } else {
+        revealElements.forEach(function (element) {
+            element.classList.add('is-visible');
+        });
+    }
+
+    const parallaxElements = document.querySelectorAll('[data-parallax]');
+    let parallaxFrame = null;
+
+    function updateParallax() {
+        parallaxElements.forEach(function (element) {
+            const rect = element.getBoundingClientRect();
+
+            if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                return;
+            }
+
+            const speed = Number(element.dataset.parallax) || 0;
+            const offset = (window.innerHeight / 2 - rect.top - rect.height / 2) * speed;
+
+            element.style.setProperty('--parallax-y', `${offset}px`);
+        });
+
+        parallaxFrame = null;
+    }
+
+    if (!reduceMotion && window.innerWidth > 767) {
+        window.addEventListener(
+            'scroll',
+            function () {
+                if (parallaxFrame === null) {
+                    parallaxFrame = window.requestAnimationFrame(updateParallax);
+                }
+            },
+            { passive: true }
+        );
+
+        updateParallax();
+    }
 
     document.addEventListener('visibilitychange', function () {
         if (!heroVideo) {

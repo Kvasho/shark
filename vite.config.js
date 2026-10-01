@@ -30,6 +30,10 @@ export default defineConfig({
 
                 'resources/css/user/services.css',
                 'resources/js/user/services.js',
+
+                'resources/css/admin/login.css',
+                'resources/css/admin/app.css',
+                'resources/js/admin/app.js',
             ],
 
             refresh: [

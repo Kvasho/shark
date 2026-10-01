@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
 
@@ -13,20 +13,23 @@
         content="{{ csrf_token() }}"
     >
 
+    <script>
+        (function () {
+            document.documentElement.classList.add('shark-page-loading');
+            if (sessionStorage.getItem('sharkPageTransitionPending') === 'true') {
+                document.documentElement.classList.add('shark-transition-arrival');
+            }
+            const savedTheme = localStorage.getItem('sharkTheme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        })();
+    </script>
+
     <title>@yield('title', 'SHARK')</title>
 
     <meta
         name="description"
-        content="@yield(
-            'description',
-            'SHARK — კომპანიის ოფიციალური ვებგვერდი'
-        )"
-    >
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="{{ asset('favicon.png') }}"
+        content="@yield('description', 'SHARK — კომპანიის ოფიციალური ვებგვერდი')"
     >
 
     @vite([
@@ -39,42 +42,26 @@
     @stack('styles')
 </head>
 
-<body class="@yield('bodyClass', 'shark-site') shark-page-loading">
+<body class="@yield('bodyClass', 'shark-site')">
 
-    <div
-        id="sharkPageLoader"
-        class="shark-page-loader is-visible"
-        role="status"
-        aria-label="გვერდი იტვირთება"
-    >
-        <div class="shark-page-loader__content">
-
-            <div
-                class="shark-page-loader__logo"
-                aria-label="SHARK"
-            >
-                SHARK
+    <div id="sharkPageTransition" class="shark-page-transition" aria-hidden="true">
+        <div class="shark-page-transition__inner">
+            <div class="shark-page-transition__logo" aria-label="SHARK">
+                <span>SHARK</span>
+                <span class="shark-page-transition__logo-fill">SHARK</span>
             </div>
-
-            <div
-                class="shark-page-loader__line"
-                aria-hidden="true"
-            ></div>
-
+            <div class="shark-page-transition__track"><span></span></div>
+            <small class="shark-page-transition__value">0%</small>
         </div>
     </div>
 
-    <div class="shark-site-wrapper">
+    @include('user.components.header')
 
-        @include('user.components.header')
+    <main class="shark-main">
+        @yield('content')
+    </main>
 
-        <main class="shark-main">
-            @yield('content')
-        </main>
-
-        @include('user.components.footer')
-
-    </div>
+    @include('user.components.footer')
 
     @stack('scripts')
 </body>
